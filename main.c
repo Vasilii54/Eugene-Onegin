@@ -3,9 +3,15 @@
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <fcntl.h>
+
 
 #define N 100
 #define NLINES 7206
+
 
 void Dump(const char* index[], int n);
 void my_swap(void* a, void* b, size_t n);
@@ -13,55 +19,78 @@ void my_qsort(void* a, size_t n, size_t size, int(* comparator) (const void *, c
 int my_strcmp_up(const void* str1, const void* str2);
 int my_strrcmp_up(const void* str1, const void* str2);
 int my_strlen(const char *s);
+int get_file_size(const char *path);
+void fill_index(const char** index, char* buffer, ssize_t m);
+char* my_strchr(char* str, char* start, char x, int n);
 
 int main() {
-    FILE* file;
-    char buf[N];
+    char pathname[] = "C:/Users/MSI/Desktop/MEOW/First/DOPY_DEDA/Dop_4_Onegin/Eugene Onegin.txt";
+    int size = get_file_size(pathname);
+    printf("File size is: %d\n", size);
+    char* buffer = (char*)calloc(size+1, sizeof(char));
+    buffer[size] = '\n';
+
+    int file;
     const char* index[NLINES] = {};
-    const char* index_copy[NLINES] = {};
-    file = fopen("Eugene Onegin.txt", "r");
-    int n = 0;
-    while(n < NLINES && fgets(buf, N, file) != NULL) {
-        // printf("%s", arr);
-        index[n] = strdup(buf);
-        index_copy[n] = strdup(buf);
-        assert(index[n] != NULL);
-        ++n;
-    }
-    fclose(file);
+    file = open(pathname, O_RDONLY);
+    ssize_t m = read(file, buffer, size);
+    close(file);
+
+    fill_index(index, buffer, m);
 
     FILE* file_out = fopen("Sorted Eugene.txt", "w");
 
     // Dump(index, n);
 
-    my_qsort(index, n, sizeof(const char *), my_strcmp_up);
+    my_qsort(index, m, sizeof(const char *), my_strcmp_up);
 
     // Dump(index, n);
 
     fputs("Sorted Eugene Onegin\n\n\n", file_out);
-    for(int i = 0; i < n; ++i) {
+
+    for(int i = 0; i < NLINES; ++i) {
         fputs(index[i], file_out);
     }
 
-    my_qsort(index, n, sizeof(const char *), my_strrcmp_up);
+    my_qsort(index, m, sizeof(const char *), my_strrcmp_up);
 
     // Dump(index, n);
-
 
     fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
     "Reversed sorted Eugene Onegin\n\n\n", file_out);
 
-    for(int i = 0; i < n; ++i) {
+    for(int i = 0; i < NLINES; ++i) {
         fputs(index[i], file_out);
     }
 
     fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
     "Orinal Eugene Onegin\n\n\n", file_out);
 
-    for(int i = 0; i < n; ++i) {
-        fputs(index_copy[i], file_out);
-    }
+    fputs(buffer, file_out);
+
     return 0;
+}
+
+void fill_index(const char** index, char* buffer, ssize_t m) {
+    char* start = NULL;
+    start = my_strchr(buffer, buffer, '\n', m);
+    int i = 0;
+    while(start != NULL) {
+        index[i++] = start;
+        start = my_strchr(buffer, start, '\n', m);
+    }
+}
+
+
+char* my_strchr(char* str, char* start, char x, int n) {
+    char* curr = start;
+    while(curr < str + n) {
+        if(*curr == x) {
+            return curr;
+        }
+        ++curr;
+    }
+    return NULL;
 }
 
 void Dump(const char* index[], int n) {
@@ -166,4 +195,15 @@ int my_strlen(const char *s) {
     while(s[i] != '\0')
         i++;
     return i;
+}
+
+int get_file_size(const char *path) {
+    struct stat st;
+
+    if(stat(path, &st) == -1) { // возвращает -1 если файл не найден
+        perror("stat"); // выводит сообщение
+        return -1;
+    }
+
+    return (int)st.st_size; // приведение типа тк по умолчанию тип off_t
 }
