@@ -28,7 +28,7 @@ int main() {
     int size = get_file_size(pathname);
     printf("File size is: %d\n", size);
     char* buffer = (char*)calloc(size+1, sizeof(char));
-    buffer[size] = '\n';
+    buffer[size] = '\0';
 
     int file;
     const char* index[NLINES] = {};
@@ -38,35 +38,32 @@ int main() {
 
     fill_index(index, buffer, m);
 
-    FILE* file_out = fopen("Sorted Eugene.txt", "w");
+    int file_out = open("Sorted Eugene2.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    // Dump(index, n);
+    assert(file_out != -1);
+
+    my_qsort(index, NLINES, sizeof(const char *), my_strcmp_up);
 
     // Dump(index, n);
 
-    my_qsort(index, m, sizeof(const char *), my_strcmp_up);
+    // fputs("Sorted Eugene Onegin\n\n\n", file_out);
+
+    write(file_out, buffer, m);
+
+    my_qsort(index, NLINES, sizeof(const char *), my_strrcmp_up);
 
     // Dump(index, n);
 
-    fputs("Sorted Eugene Onegin\n\n\n", file_out);
+    // fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
+    // "Reversed sorted Eugene Onegin\n\n\n", file_out);
 
-    for(int i = 0; i < NLINES; ++i) {
-        fputs(index[i], file_out);
-    }
+    write(file_out, buffer, m);
 
-    my_qsort(index, m, sizeof(const char *), my_strrcmp_up);
 
-    // Dump(index, n);
+    // fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
+    // "Orinal Eugene Onegin\n\n\n", file_out);
 
-    fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
-    "Reversed sorted Eugene Onegin\n\n\n", file_out);
-
-    for(int i = 0; i < NLINES; ++i) {
-        fputs(index[i], file_out);
-    }
-
-    fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
-    "Orinal Eugene Onegin\n\n\n", file_out);
-
-    fputs(buffer, file_out);
+    write(file_out, buffer, m);
 
     return 0;
 }
@@ -77,7 +74,7 @@ void fill_index(const char** index, char* buffer, ssize_t m) {
     int i = 0;
     while(start != NULL) {
         index[i++] = start;
-        start = my_strchr(buffer, start, '\n', m);
+        start = my_strchr(buffer, start + 1, '\n', m);
     }
 }
 
