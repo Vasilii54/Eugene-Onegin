@@ -10,7 +10,7 @@
 
 
 #define N 100
-#define NLINES 7206
+#define NLINES 15 // 7206
 
 
 void Dump(const char* index[], int n);
@@ -24,7 +24,7 @@ void fill_index(const char** index, char* buffer, ssize_t m);
 char* my_strchr(char* str, char* start, char x, int n);
 
 int main() {
-    char pathname[] = "C:/Users/MSI/Desktop/MEOW/First/DOPY_DEDA/Dop_4_Onegin/Eugene Onegin.txt";
+    char pathname[] = "C:/Users/MSI/Desktop/MEOW/First/DOPY_DEDA/Dop_4_Onegin/input.txt";
     int size = get_file_size(pathname);
     printf("File size is: %d\n", size);
     char* buffer = (char*)calloc(size+1, sizeof(char));
@@ -37,33 +37,37 @@ int main() {
     close(file);
 
     fill_index(index, buffer, m);
+    printf("after fill_index\n");
+    FILE* file_out = fopen("Sorted Eugene.txt", "w");
 
-    int file_out = open("Sorted Eugene2.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    // Dump(index, n);
-    assert(file_out != -1);
+    Dump(index, NLINES);
 
     my_qsort(index, NLINES, sizeof(const char *), my_strcmp_up);
+    printf("after first qsort\n");
 
     // Dump(index, n);
 
-    // fputs("Sorted Eugene Onegin\n\n\n", file_out);
+    fputs("Sorted Eugene Onegin\n\n\n", file_out);
 
-    write(file_out, buffer, m);
+    for(int i = 0; i < NLINES; ++i) {
+        fputs(index[i], file_out);
+    }
 
     my_qsort(index, NLINES, sizeof(const char *), my_strrcmp_up);
 
     // Dump(index, n);
 
-    // fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
-    // "Reversed sorted Eugene Onegin\n\n\n", file_out);
+    fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
+    "Reversed sorted Eugene Onegin\n\n\n", file_out);
 
-    write(file_out, buffer, m);
+    for(int i = 0; i < NLINES; ++i) {
+        fputs(index[i], file_out);
+    }
 
+    fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
+    "Orinal Eugene Onegin\n\n\n", file_out);
 
-    // fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
-    // "Orinal Eugene Onegin\n\n\n", file_out);
-
-    write(file_out, buffer, m);
+    fputs(buffer, file_out);
 
     return 0;
 }
