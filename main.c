@@ -10,7 +10,7 @@
 
 
 #define N 100
-#define NLINES 15 // 7206
+#define NLINES 8000 // 7206
 
 
 void Dump(const char* index[], int n);
@@ -20,13 +20,13 @@ int my_strcmp_up(const void* str1, const void* str2);
 int my_strrcmp_up(const void* str1, const void* str2);
 int my_strlen(const char *s);
 int get_file_size(const char *path);
-void fill_index(const char** index, char* buffer, ssize_t m);
+int fill_index(const char** index, char* buffer, int m);
 char* my_strchr(char* str, char* start, char x, int n);
 
 int main() {
-    char pathname[] = "C:/Users/MSI/Desktop/MEOW/First/DOPY_DEDA/Dop_4_Onegin/input.txt";
+    char pathname[] = "C:/Users/MSI/Desktop/MEOW/First/DOPY_DEDA/Dop_4_Onegin/Eugene Onegin.txt";
     int size = get_file_size(pathname);
-    printf("File size is: %d\n", size);
+    // printf("File size is: %d\n", size);
     char* buffer = (char*)calloc(size+1, sizeof(char));
     buffer[size] = '\0';
 
@@ -36,50 +36,85 @@ int main() {
     ssize_t m = read(file, buffer, size);
     close(file);
 
-    fill_index(index, buffer, m);
+    char* buffer_original = (char*)calloc(size+1, sizeof(char));
+    strcpy(buffer_original, buffer);
+
+    int n = 0;
+    n = fill_index(index, buffer, m);
+    printf("n = %d\n", n);
     printf("after fill_index\n");
     FILE* file_out = fopen("Sorted Eugene.txt", "w");
 
-    Dump(index, NLINES);
+    // Dump(index, n);
 
-    my_qsort(index, NLINES, sizeof(const char *), my_strcmp_up);
+    my_qsort(index, n, sizeof(const char *), my_strcmp_up);
     printf("after first qsort\n");
 
     // Dump(index, n);
 
     fputs("Sorted Eugene Onegin\n\n\n", file_out);
 
-    for(int i = 0; i < NLINES; ++i) {
+    for(int i = 0; i < n; ++i) {
         fputs(index[i], file_out);
+        fputs("\n", file_out);
     }
 
-    my_qsort(index, NLINES, sizeof(const char *), my_strrcmp_up);
+    my_qsort(index, n, sizeof(const char *), my_strrcmp_up);
 
     // Dump(index, n);
 
     fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
     "Reversed sorted Eugene Onegin\n\n\n", file_out);
 
-    for(int i = 0; i < NLINES; ++i) {
+    for(int i = 0; i < n; ++i) {
         fputs(index[i], file_out);
+        fputs("\n", file_out);
     }
 
     fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
     "Orinal Eugene Onegin\n\n\n", file_out);
 
-    fputs(buffer, file_out);
+    fputs(buffer_original, file_out);
 
     return 0;
 }
-
-void fill_index(const char** index, char* buffer, ssize_t m) {
+/*
+int fill_index(const char** index, char* buffer, ssize_t m) {
     char* start = NULL;
     start = my_strchr(buffer, buffer, '\n', m);
     int i = 0;
+    index[i++] = buffer;
+
     while(start != NULL) {
-        index[i++] = start;
+        *start = '\0';
+        index[i++] = start + 1;
         start = my_strchr(buffer, start + 1, '\n', m);
     }
+    return i;
+} */
+
+int fill_index(const char** index, char* buffer, int m) {
+    int n = 0;
+
+    if (m <= 0) {
+        return 0;
+    }
+
+    // Первая строка начинается с начала буфера
+    index[n++] = buffer;
+
+    for (int i = 0; i < m; ++i) {
+        if (buffer[i] == '\n') {
+            buffer[i] = '\0';
+
+            // Если после \n есть ещё символы, это начало следующей строки
+            if (i + 1 < m) {
+                index[n++] = buffer + i + 1;
+            }
+        }
+    }
+
+    return n;
 }
 
 
@@ -131,11 +166,11 @@ void my_qsort(void* a, size_t n, size_t size, int(* comparator) (const void *, c
 }
 
 void my_swap(void* a, void* b, size_t n) {
-    char temp = '\0';
+    unsigned char temp = '\0';
     for(int i = 0; i < n; ++i) {
-        temp = *((char*)a+i);
-        *((char*)a+i) = *((char*)b+i);
-        *((char*)b+i) = temp;
+        temp = *((unsigned char*)a+i);
+        *((unsigned char*)a+i) = *((unsigned char*)b+i);
+        *((unsigned char*)b+i) = temp;
     }
 
 }
