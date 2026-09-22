@@ -34,29 +34,22 @@ char* my_strchr(char* str, char* start, char x, int n);
 
 void put_txt_to_file(const char** index, int n, FILE* file_out);
 
-ssize_t do_input(char* buffer, char* buffer_original);
+ssize_t do_input(char** buffer, char** buffer_original);
 
 int main() {
     char* buffer = NULL;
     char* buffer_original = NULL;
     const char* index[NLINES] = {};
 
-    printf("after initialization\n");
-
-    ssize_t m = do_input(buffer, buffer_original);
-
-    printf("after do_input m = %d\n", m);
+    ssize_t m = do_input(&buffer, &buffer_original);
 
     int n = fill_index(index, buffer, m);
 
-    printf("n = %d\n", n);
-    printf("after fill_index\n");
     FILE* file_out = fopen("Sorted Eugene.txt", "w");
 
     // Dump(index, n);
 
     my_qsort(index, n, sizeof(index[0]), my_strcmp_up);
-    printf("after first qsort\n");
 
     // Dump(index, n);
 
@@ -85,26 +78,26 @@ int main() {
     return 0;
 }
 
-ssize_t do_input(char* buffer, char* buffer_original) {
+ssize_t do_input(char** buffer, char** buffer_original) {
     const char pathname[] =
     "C:/Users/MSI/Desktop/MEOW/First/DOPY_DEDA/Dop_4_Onegin/Eugene Onegin.txt";
 
     int size = get_file_size(pathname);
     // printf("File size is: %d\n", size);
 
-    buffer = (char*)calloc(size+1, sizeof(char));
+    *buffer = (char*)calloc(size+1, sizeof(char));
 
     int file;
 
     file = open(pathname, O_RDONLY);
 
-    ssize_t m = read(file, buffer, size);
-    buffer[m] = '\0';
+    ssize_t m = read(file, *buffer, size);
+    (*buffer)[m] = '\0';
 
     close(file);
 
-    buffer_original = (char*)calloc(m + 1, sizeof(char));
-    memcpy(buffer_original, buffer, m + 1);
+    *buffer_original = (char*)calloc(m + 1, sizeof(char));
+    memcpy(*buffer_original, *buffer, m + 1);
 
     return m;
 }
