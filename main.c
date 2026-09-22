@@ -14,40 +14,57 @@
 
 
 void Dump(const char* index[], int n);
+
 void my_swap(void* a, void* b, size_t n);
-void my_qsort(void* a, size_t n, size_t size, int(* comparator) (const void *, const void *));
+
+void my_qsort(void* a, size_t n, size_t size,
+              int(* comparator) (const void *, const void *));
+
 int my_strcmp_up(const void* str1, const void* str2);
+
 int my_strrcmp_up(const void* str1, const void* str2);
+
 int my_strlen(const char *s);
+
 int get_file_size(const char *path);
+
 int fill_index(const char** index, char* buffer, int m);
+
 char* my_strchr(char* str, char* start, char x, int n);
 
 int main() {
-    char pathname[] = "C:/Users/MSI/Desktop/MEOW/First/DOPY_DEDA/Dop_4_Onegin/Eugene Onegin.txt";
+    const char pathname[] =
+    "C:/Users/MSI/Desktop/MEOW/First/DOPY_DEDA/Dop_4_Onegin/Eugene Onegin.txt";
+
     int size = get_file_size(pathname);
     // printf("File size is: %d\n", size);
+
     char* buffer = (char*)calloc(size+1, sizeof(char));
-    buffer[size] = '\0';
 
     int file;
+
     const char* index[NLINES] = {};
+
     file = open(pathname, O_RDONLY);
+
     ssize_t m = read(file, buffer, size);
+    buffer[m] = '\0';
+
     close(file);
 
-    char* buffer_original = (char*)calloc(size+1, sizeof(char));
-    strcpy(buffer_original, buffer);
+    char* buffer_original = (char*)calloc(m + 1, sizeof(char));
+    memcpy(buffer_original, buffer, m + 1);
 
     int n = 0;
     n = fill_index(index, buffer, m);
+
     printf("n = %d\n", n);
     printf("after fill_index\n");
     FILE* file_out = fopen("Sorted Eugene.txt", "w");
 
     // Dump(index, n);
 
-    my_qsort(index, n, sizeof(const char *), my_strcmp_up);
+    my_qsort(index, n, sizeof(index[0]), my_strcmp_up);
     printf("after first qsort\n");
 
     // Dump(index, n);
@@ -59,7 +76,7 @@ int main() {
         fputs("\n", file_out);
     }
 
-    my_qsort(index, n, sizeof(const char *), my_strrcmp_up);
+    my_qsort(index, n, sizeof(index[0]), my_strrcmp_up);
 
     // Dump(index, n);
 
@@ -72,26 +89,16 @@ int main() {
     }
 
     fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
-    "Orinal Eugene Onegin\n\n\n", file_out);
+    "Original Eugene Onegin\n\n\n", file_out);
 
     fputs(buffer_original, file_out);
 
+    fclose(file_out);
+    free(buffer_original);
+    free(buffer);
+
     return 0;
 }
-/*
-int fill_index(const char** index, char* buffer, ssize_t m) {
-    char* start = NULL;
-    start = my_strchr(buffer, buffer, '\n', m);
-    int i = 0;
-    index[i++] = buffer;
-
-    while(start != NULL) {
-        *start = '\0';
-        index[i++] = start + 1;
-        start = my_strchr(buffer, start + 1, '\n', m);
-    }
-    return i;
-} */
 
 int fill_index(const char** index, char* buffer, int m) {
     int n = 0;
@@ -197,6 +204,53 @@ int my_strcmp_up(const void* str1, const void* str2) {
     if (*s1 == '\0' && *s2 == '\0') return 0;
     return (*s1 == '\0') ? -1 : 1;
 }
+/*
+int my_strrcmp_up(const void* string1, const void* string2) {
+    const char* s1 = *(const char**)string1;
+    const char* s2 = *(const char**)string2;
+
+    size_t i = my_strlen(s1);
+    size_t j = my_strlen(s2);
+
+    while (1) {
+
+        while (i > 0 &&
+               !isalpha((unsigned char)s1[i - 1])) {
+            --i;
+        }
+
+        while (j > 0 &&
+               !isalpha((unsigned char)s2[j - 1])) {
+            --j;
+        }
+
+        if (i == 0 || j == 0)
+            break;
+
+        unsigned char c1 =
+            (unsigned char)tolower(
+                (unsigned char)s1[i - 1]
+            );
+
+        unsigned char c2 =
+            (unsigned char)tolower(
+                (unsigned char)s2[j - 1]
+            );
+
+        if (c1 != c2) {
+            return (c1 > c2) ? 1 : -1;
+        }
+
+        --i;
+        --j;
+    }
+
+    if (i == 0 && j == 0)
+        return 0;
+
+    return (i == 0) ? -1 : 1;
+}
+*/
 
 int my_strrcmp_up(const void* string1, const void* string2) {
     const char* str1 = *(const char**)string1;
