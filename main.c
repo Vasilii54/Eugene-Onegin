@@ -1,3 +1,9 @@
+// флаги для сортировки
+// библиотека из своих строковых функций -> НАДО СДЕЛАТЬ АССЕРТЫ
+// НА БАЗОВУЮ КАФЕДРУ ВЛИЯЮТ ЛЕТНИЕ СТАЖИРОВКИ
+// НА СТАЖИРОВКИ МОЖНО ПОПАСТЬ ЕСЛИ ЗАКРЫВАТЬ ХУАВЕЙ И ОЧЕНЬ МНОГО РАБОТАТЬ И ТД
+// МОЖНО ПОПАСТЬ В СБЕР И ТД,
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -7,7 +13,6 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
-
 
 #define N 100
 #define NLINES 8000 // 7206
@@ -53,7 +58,7 @@ int main() {
 
     // Dump(index, n);
 
-    fputs("Sorted Eugene Onegin\n\n\n", file_out);
+    fputs("Отсортированный Евгений Онегин:\n\n\n", file_out);
 
     put_txt_to_file(index, n, file_out);
 
@@ -62,7 +67,7 @@ int main() {
     // Dump(index, n);
 
     fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
-    "Reversed sorted Eugene Onegin\n\n\n", file_out);
+    "Отсортированный с конца Евгений Онегин\n\n\n", file_out);
 
     put_txt_to_file(index, n, file_out);
 
@@ -79,13 +84,14 @@ int main() {
 }
 
 ssize_t do_input(char** buffer, char** buffer_original) {
-    const char pathname[] =
+    const char* pathname =
     "C:/Users/MSI/Desktop/MEOW/First/DOPY_DEDA/Dop_4_Onegin/Eugene Onegin.txt";
 
     int size = get_file_size(pathname);
     // printf("File size is: %d\n", size);
 
     *buffer = (char*)calloc(size+1, sizeof(char));
+    assert(buffer != NULL);
 
     int file;
 
@@ -97,6 +103,8 @@ ssize_t do_input(char** buffer, char** buffer_original) {
     close(file);
 
     *buffer_original = (char*)calloc(m + 1, sizeof(char));
+    assert(buffer_original != NULL);
+
     memcpy(*buffer_original, *buffer, m + 1);
 
     return m;
@@ -267,7 +275,7 @@ int my_strrcmp_up(const void* string1, const void* string2) {
     const char* str2 = *(const char**)string2;
 
     const char* s1 = NULL;
-    s1 = str1 + my_strlen(str1) - 1; // можно как-то убрать strlen
+    s1 = str1 + my_strlen(str1) - 1;
     const char* s2 = NULL;
     s2 = str2 + my_strlen(str2) - 1;
 
@@ -301,6 +309,7 @@ ssize_t get_file_size(const char *path) {
     struct stat st;
 
     if(stat(path, &st) == -1) { // возвращает -1 если файл не найден
+        printf("file by path: %s didnt found\n", path);
         perror("stat"); // выводит сообщение
         return -1;
     }
