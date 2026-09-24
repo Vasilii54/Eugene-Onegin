@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdint.h>
 
 #define N 100
 #define NLINES 8000 // 7206
@@ -39,18 +40,26 @@ char* my_strchr(char* str, char* start, char x, int n);
 
 void put_txt_to_file(const char** index, int n, FILE* file_out);
 
-ssize_t do_input(char** buffer, char** buffer_original);
+ssize_t do_input(char** buffer, char** buffer_original, const char* path);
 
-int main() {
+int letter_key(unsigned char c);
+
+int is_letter(unsigned char c);
+
+int main(int argc, char* argv[]) {
+    if(argc < 3) {
+        printf("Too few arguments!\n");
+    }
+
     char* buffer = NULL;
     char* buffer_original = NULL;
     const char* index[NLINES] = {};
 
-    ssize_t m = do_input(&buffer, &buffer_original);
+    ssize_t m = do_input(&buffer, &buffer_original, argv[1]);
 
     int n = fill_index(index, buffer, m);
 
-    FILE* file_out = fopen("Sorted Eugene.txt", "w");
+    FILE* file_out = fopen(argv[2], "w");
 
     // Dump(index, n);
 
@@ -58,7 +67,7 @@ int main() {
 
     // Dump(index, n);
 
-    fputs("ÐžÑ‚ÑÐ¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¹ Ð•Ð²Ð³ÐµÐ½Ð¸Ð¹ ÐžÐ½ÐµÐ³Ð¸Ð½:\n\n\n", file_out);
+    fputs("Îòñîðòèðîâàííûé Åâãåíèé Îíåãèí\n\n\n", file_out);
 
     put_txt_to_file(index, n, file_out);
 
@@ -67,12 +76,12 @@ int main() {
     // Dump(index, n);
 
     fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
-    "ÐžÑ‚ÑÐ¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¹ Ñ ÐºÐ¾Ð½Ñ†Ð° Ð•Ð²Ð³ÐµÐ½Ð¸Ð¹ ÐžÐ½ÐµÐ³Ð¸Ð½\n\n\n", file_out);
+    "Îòñîðòèðîâàííûé ñ êîíöà Åâãåíèé Îíåãèí\n\n\n", file_out);
 
     put_txt_to_file(index, n, file_out);
 
     fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
-    "Original Eugene Onegin\n\n\n", file_out);
+    "Îðèãèíàëüíûé Åâãåíèé Îíåãèí\n\n\n", file_out);
 
     fputs(buffer_original, file_out);
 
@@ -83,11 +92,53 @@ int main() {
     return 0;
 }
 
-ssize_t do_input(char** buffer, char** buffer_original) {
-    const char* pathname =
-    "C:/Users/MSI/Desktop/MEOW/First/DOPY_DEDA/Dop_4_Onegin/Eugene Onegin.txt";
+int letter_key(unsigned char c) {
 
-    int size = get_file_size(pathname);
+    // Àíãëèéñêèå áóêâû
+    if (c >= 'A' && c <= 'Z') {
+        return 100 + (c - 'A');
+    }
+
+    if (c >= 'a' && c <= 'z') {
+        return 100 + (c - 'a');
+    }
+
+    // ¨
+    if (c == 0xA8 || c == 0xB8) {
+        return 7;
+    }
+
+    // À Á Â Ã Ä Å
+    if (c >= 0xC0 && c <= 0xC5) {
+        return c - 0xC0 + 1;
+    }
+
+    // Æ Ç È É Ê Ë Ì Í Î Ï Ð Ñ Ò Ó Ô Õ Ö × Ø Ù Ú Û Ü Ý Þ ß
+    if (c >= 0xC6 && c <= 0xDF) {
+        return c - 0xC6 + 8;
+    }
+
+    // à á â ã ä å
+    if (c >= 0xE0 && c <= 0xE5) {
+        return c - 0xE0 + 1;
+    }
+
+    // æ ç è é ê ë ì í î ï ð ñ ò ó ô õ ö ÷ ø ù ú û ü ý þ ÿ
+    if (c >= 0xE6 && c <= 0xFF) {
+        return c - 0xE6 + 8;
+    }
+
+    return -1;
+}
+
+
+int is_letter(unsigned char c) {
+    return letter_key(c) != -1;
+}
+
+ssize_t do_input(char** buffer, char** buffer_original, const char* path) {
+
+    int size = get_file_size(path);
     // printf("File size is: %d\n", size);
 
     *buffer = (char*)calloc(size+1, sizeof(char));
@@ -95,7 +146,7 @@ ssize_t do_input(char** buffer, char** buffer_original) {
 
     int file;
 
-    file = open(pathname, O_RDONLY);
+    file = open(path, O_RDONLY);
 
     ssize_t m = read(file, *buffer, size);
     (*buffer)[m] = '\0';
@@ -206,18 +257,20 @@ int my_strcmp_up(const void* str1, const void* str2) {
 
     while (*s1 && *s2) {
 
-        if (!isalpha((unsigned char)*s1)) { ++s1; continue; }
-        if (!isalpha((unsigned char)*s2)) { ++s2; continue; }
-        if (tolower(*s1) != tolower(*s2)) {
-            return (tolower(*s1) > tolower(*s2)) ? 1 : -1;
+        if (!is_letter((unsigned char)*s1)) { ++s1; continue; }
+        if (!is_letter((unsigned char)*s2)) { ++s2; continue; }
+        int k1 = letter_key(*s1);
+        int k2 = letter_key(*s2);
+        if (k1 != k2) {
+            return (k1 > k2) ? 1 : -1;
         }
         ++s1;
         ++s2;
     }
 
     // ÐŸÑ€Ð¾Ð¿ÑƒÑÐºÐ°ÐµÐ¼ Ð¾ÑÑ‚Ð°Ð²ÑˆÐ¸ÐµÑÑ Ð½Ðµ-Ð±ÑƒÐºÐ²Ñ‹ Ð² Ñ‚Ð¾Ð¹ ÑÑ‚Ñ€Ð¾ÐºÐµ, ÐºÐ¾Ñ‚Ð¾Ñ€Ð°Ñ ÐµÑ‰Ñ‘ Ð½Ðµ Ð·Ð°ÐºÐ¾Ð½Ñ‡Ð¸Ð»Ð°ÑÑŒ
-    while (*s1 && !isalpha((unsigned char)*s1)) ++s1;
-    while (*s2 && !isalpha((unsigned char)*s2)) ++s2;
+    while (*s1 && !is_letter((unsigned char)*s1)) ++s1;
+    while (*s2 && !is_letter((unsigned char)*s2)) ++s2;
 
     if (*s1 == '\0' && *s2 == '\0') return 0;
     return (*s1 == '\0') ? -1 : 1;
@@ -281,10 +334,12 @@ int my_strrcmp_up(const void* string1, const void* string2) {
 
     while ((s1 != str1-1) && (s2 != str2-1)) {
 
-        if (!isalpha((unsigned char)*s1)) { --s1; continue; }
-        if (!isalpha((unsigned char)*s2)) { --s2; continue; }
-        if (tolower(*s1) != tolower(*s2)) {
-            return (tolower(*s1) > tolower(*s2)) ? 1 : -1;
+        if (!is_letter((unsigned char)*s1)) { --s1; continue; }
+        if (!is_letter((unsigned char)*s2)) { --s2; continue; }
+        int k1 = letter_key(*s1);
+        int k2 = letter_key(*s2);
+        if (k1 != k2) {
+            return (k1 > k2) ? 1 : -1;
         }
         --s1;
         --s2;
