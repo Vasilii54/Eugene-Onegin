@@ -36,6 +36,8 @@ ssize_t get_file_size(const char *path);
 
 int fill_index(const char** index, char* buffer, int m);
 
+void make_poem(const char** index, const char** new_poem, int num, int num_of_lines);
+
 char* my_strchr(char* str, char* start, char x, int n);
 
 void put_txt_to_file(const char** index, int n, FILE* file_out);
@@ -67,21 +69,30 @@ int main(int argc, char* argv[]) {
 
     // Dump(index, n);
 
-    fputs("Отсортированный Евгений Онегин\n\n\n", file_out);
+    fputs("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ\n\n\n", file_out);
 
     put_txt_to_file(index, n, file_out);
 
     my_qsort(index, n, sizeof(index[0]), my_strrcmp_up);
 
+    if(argc > 3) {
+        int num = atoi(argv[3]); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+        const char** new_poem = NULL;
+        new_poem = (const char**)calloc(num*4, sizeof(char*));
+        make_poem(index, new_poem, num, n);
+        Dump(new_poem, num*4);
+        put_txt_to_file(new_poem, num*4, fopen(argv[4], "w"));
+    }
+
     // Dump(index, n);
 
     fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
-    "Отсортированный с конца Евгений Онегин\n\n\n", file_out);
+    "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ\n\n\n", file_out);
 
     put_txt_to_file(index, n, file_out);
 
     fputs("\n\n========== !!!!!!!!!!!!!!! ==========================\n\n\n"
-    "Оригинальный Евгений Онегин\n\n\n", file_out);
+    "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ\n\n\n", file_out);
 
     fputs(buffer_original, file_out);
 
@@ -94,7 +105,7 @@ int main(int argc, char* argv[]) {
 
 int letter_key(unsigned char c) {
 
-    // Английские буквы
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
     if (c >= 'A' && c <= 'Z') {
         return 100 + (c - 'A');
     }
@@ -103,27 +114,27 @@ int letter_key(unsigned char c) {
         return 100 + (c - 'a');
     }
 
-    // Ё
+    // пїЅ
     if (c == 0xA8 || c == 0xB8) {
         return 7;
     }
 
-    // А Б В Г Д Е
+    // пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ
     if (c >= 0xC0 && c <= 0xC5) {
         return c - 0xC0 + 1;
     }
 
-    // Ж З И Й К Л М Н О П Р С Т У Ф Х Ц Ч Ш Щ Ъ Ы Ь Э Ю Я
+    // пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ
     if (c >= 0xC6 && c <= 0xDF) {
         return c - 0xC6 + 8;
     }
 
-    // а б в г д е
+    // пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ
     if (c >= 0xE0 && c <= 0xE5) {
         return c - 0xE0 + 1;
     }
 
-    // ж з и й к л м н о п р с т у ф х ц ч ш щ ъ ы ь э ю я
+    // пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ пїЅ
     if (c >= 0xE6 && c <= 0xFF) {
         return c - 0xE6 + 8;
     }
@@ -167,6 +178,21 @@ void put_txt_to_file(const char** index, int n, FILE* file_out) {
             fputs(index[i], file_out);
             fputs("\n", file_out);
         }
+    }
+}
+
+void make_poem(const char** index, const char** new_poem, int num, int num_of_lines) {
+    /*
+    пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ,
+     пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 4 пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ num пїЅпїЅпїЅ
+    */
+    for(int i = 0; i < num*4; i += 4) {
+        int num1 = rand() % (num_of_lines - 1);
+        int num2 = rand() % (num_of_lines - 1);
+        new_poem[i] = index[num1];
+        new_poem[i+1] = index[num2];
+        new_poem[i+2] = index[num1 + 1];
+        new_poem[i+3] = index[num2 + 1];
     }
 }
 
