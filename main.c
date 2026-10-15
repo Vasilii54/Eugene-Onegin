@@ -48,6 +48,8 @@ int letter_key(unsigned char c);
 
 int is_letter(unsigned char c);
 
+// аргументы: 1. файл с текстом 2. файл вывода 3. кол-во новых строф 4. файл для новой поэмы
+
 int main(int argc, char* argv[]) {
     if(argc < 3) {
         printf("Too few arguments!\n");
@@ -78,10 +80,10 @@ int main(int argc, char* argv[]) {
     if(argc > 3) {
         int num = atoi(argv[3]); // ���������� �����
         const char** new_poem = NULL;
-        new_poem = (const char**)calloc(num*4, sizeof(char*));
+        new_poem = (const char**)calloc(num*5, sizeof(char*));
         make_poem(index, new_poem, num, n);
-        Dump(new_poem, num*4);
-        put_txt_to_file(new_poem, num*4, fopen(argv[4], "w"));
+        Dump(new_poem, num*5);
+        put_txt_to_file(new_poem, num*5, fopen(argv[4], "w"));
     }
 
     // Dump(index, n);
@@ -186,13 +188,14 @@ void make_poem(const char** index, const char** new_poem, int num, int num_of_li
     �������� ��� ��������� ������ � ��� ������ ����� � ����,
      �������� 4 ������ ����� � ��� num ���
     */
-    for(int i = 0; i < num*4; i += 4) {
-        int num1 = rand() % (num_of_lines - 1);
-        int num2 = rand() % (num_of_lines - 1);
+    for(int i = 0; i < num*5; i += 5) {
+        int num1 = rand() % (num_of_lines - 400);
+        int num2 = rand() % (num_of_lines - 400);
         new_poem[i] = index[num1];
         new_poem[i+1] = index[num2];
         new_poem[i+2] = index[num1 + 1];
         new_poem[i+3] = index[num2 + 1];
+        new_poem[i+4] = (char*)"\n\n";
     }
 }
 
