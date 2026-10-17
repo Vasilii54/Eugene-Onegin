@@ -195,7 +195,7 @@ void make_poem(const char** index, const char** new_poem, int num, int num_of_li
         new_poem[i+1] = index[num2];
         new_poem[i+2] = index[num1 + 1];
         new_poem[i+3] = index[num2 + 1];
-        new_poem[i+4] = (char*)"\n\n";
+        new_poem[i+4] = (char*)"\n";
     }
 }
 
