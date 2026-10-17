@@ -1,9 +1,3 @@
-// флаги для сортировки
-// библиотека из своих строковых функций -> НАДО СДЕЛАТЬ АССЕРТЫ
-// НА БАЗОВУЮ КАФЕДРУ ВЛИЯЮТ ЛЕТНИЕ СТАЖИРОВКИ
-// НА СТАЖИРОВКИ МОЖНО ПОПАСТЬ ЕСЛИ ЗАКРЫВАТЬ ХУАВЕЙ И ОЧЕНЬ МНОГО РАБОТАТЬ И ТД
-// МОЖНО ПОПАСТЬ В СБЕР И ТД,
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -304,53 +298,6 @@ int my_strcmp_up(const void* str1, const void* str2) {
     if (*s1 == '\0' && *s2 == '\0') return 0;
     return (*s1 == '\0') ? -1 : 1;
 }
-/*
-int my_strrcmp_up(const void* string1, const void* string2) {
-    const char* s1 = *(const char**)string1;
-    const char* s2 = *(const char**)string2;
-
-    size_t i = my_strlen(s1);
-    size_t j = my_strlen(s2);
-
-    while (1) {
-
-        while (i > 0 &&
-               !isalpha((unsigned char)s1[i - 1])) {
-            --i;
-        }
-
-        while (j > 0 &&
-               !isalpha((unsigned char)s2[j - 1])) {
-            --j;
-        }
-
-        if (i == 0 || j == 0)
-            break;
-
-        unsigned char c1 =
-            (unsigned char)tolower(
-                (unsigned char)s1[i - 1]
-            );
-
-        unsigned char c2 =
-            (unsigned char)tolower(
-                (unsigned char)s2[j - 1]
-            );
-
-        if (c1 != c2) {
-            return (c1 > c2) ? 1 : -1;
-        }
-
-        --i;
-        --j;
-    }
-
-    if (i == 0 && j == 0)
-        return 0;
-
-    return (i == 0) ? -1 : 1;
-}
-*/
 
 int my_strrcmp_up(const void* string1, const void* string2) {
     const char* str1 = *(const char**)string1;
